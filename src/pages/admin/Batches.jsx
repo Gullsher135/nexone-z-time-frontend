@@ -82,7 +82,7 @@ export default function Batches() {
           {state.data && (state.data.items.length === 0 ? (
             <Empty title="No batches yet">Create a batch, then add students to it from the People page.</Empty>
           ) : (
-            <table className="table">
+            <table className="table cards">
               <thead><tr><th>Batch</th><th>Instructor</th><th>Timing</th><th>Dates</th><th>Students</th><th>Status</th><th /></tr></thead>
               <tbody>
                 {state.data.items.map((b) => (

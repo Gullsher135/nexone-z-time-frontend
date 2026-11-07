@@ -318,13 +318,13 @@ export default function People() {
           {state.data && (state.data.items.length === 0 ? (
             <Empty title={`No ${ROLE_LABEL[role].toLowerCase()}s found`}>{q ? 'Try a different search.' : `Use "Add ${ROLE_LABEL[role].toLowerCase()}" to create the first one.`}</Empty>
           ) : (
-            <table className="table">
+            <table className="table cards">
               <thead><tr><th>Name</th><th>Contact</th><th>Details</th><th>Status</th><th /></tr></thead>
               <tbody>
                 {state.data.items.map((u) => (
                   <tr key={u._id} style={!u.isActive ? { opacity: 0.6 } : undefined}>
                     <td><div style={{ fontWeight: 600 }}>{u.name}</div><div className="muted small">{u.code}</div></td>
-                    <td><div>{u.email || '-'}</div><div className="muted small">{u.phone}</div></td>
+                    <td className="full"><div>{u.email || '-'}</div><div className="muted small">{u.phone}</div></td>
                     <td className="small">{detail(u)}</td>
                     <td><span className={`chip ${u.isActive ? 'ok' : 'muted'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td className="r nowrap">

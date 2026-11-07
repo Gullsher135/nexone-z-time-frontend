@@ -1,6 +1,6 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './lib/auth.jsx';
-import { Spinner } from './components.jsx';
+import { Spinner, TableLabels } from './components.jsx';
 import Login from './pages/Login.jsx';
 import Scan from './pages/Scan.jsx';
 import StaffLayout from './layouts/StaffLayout.jsx';
@@ -34,6 +34,8 @@ function Protected({ role }) {
 
 export default function App() {
   return (
+    <>
+    <TableLabels />
     <Routes>
       <Route path="/login" element={<Login />} />
 
@@ -64,5 +66,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

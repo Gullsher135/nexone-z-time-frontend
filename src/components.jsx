@@ -110,7 +110,32 @@ export function PresenceStrip({ checkIn, checkOut, shift, live = false, big = fa
   );
 }
 
+// Phones show tables as cards. Each cell gets its column title so the card can label every value.
+export function TableLabels() {
+  useEffect(() => {
+    const apply = () => {
+      document.querySelectorAll('table.cards').forEach((t) => {
+        const heads = [...t.querySelectorAll('thead th')].map((h) => h.textContent.trim());
+        t.querySelectorAll('tbody tr').forEach((tr) => {
+          [...tr.children].forEach((td, i) => {
+            const label = heads[i] || '';
+            if (td.getAttribute('data-label') !== label) td.setAttribute('data-label', label);
+          });
+        });
+      });
+    };
+    apply();
+    const mo = new MutationObserver(apply);
+    mo.observe(document.getElementById('root'), { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, []);
+  return null;
+}
+
 export const Icon = {
+  menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>,
+  close: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>,
+  user: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>,
   home: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" /></svg>,
   clock: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
   people: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><path d="M16 4.6a3.5 3.5 0 010 6.8M18 14.4c2 .7 3.5 2.4 3.5 5.6" /></svg>,

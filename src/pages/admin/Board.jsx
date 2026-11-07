@@ -145,7 +145,7 @@ export default function Board() {
                 {rows.length === 0 ? (
                   <Empty title="No one to show">Try another filter or date.</Empty>
                 ) : (
-                  <table className="table">
+                  <table className="table cards c3">
                     <thead>
                       <tr><th>Person</th><th style={{ width: '32%' }}>7 am to 9 pm</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th /></tr>
                     </thead>
@@ -159,11 +159,11 @@ export default function Board() {
                               <div style={{ fontWeight: 600 }}>{r.user.name}</div>
                               <div className="muted small">{r.user.role === 'intern' ? 'Intern' : r.user.designation || 'Employee'}</div>
                             </td>
-                            <td><PresenceStrip checkIn={inS} checkOut={outS} shift={r.user.shift} live={isToday} /></td>
+                            <td className="full"><PresenceStrip checkIn={inS} checkOut={outS} shift={r.user.shift} live={isToday} /></td>
                             <td className="nowrap">{inS ? to12h(inS) : '-'}</td>
                             <td className="nowrap">{outS ? to12h(outS) : '-'}</td>
                             <td className="nowrap">{r.record?.workMinutes ? fmtDuration(r.record.workMinutes) : '-'}</td>
-                            <td>
+                            <td className="full">
                               <StatusChip status={r.status} />
                               {r.record?.lateMinutes > 0 && <span className="muted small"> {r.record.lateMinutes}m</span>}
                               {r.record?.checkInMethod === 'manual' && <span className="muted small"> · edited</span>}

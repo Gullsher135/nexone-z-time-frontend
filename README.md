@@ -34,3 +34,7 @@ Turn on **QR code only** in Settings if you want to disable the Check in button 
 ## Branding
 
 NexoneZ Time uses its own icon (`public/time-icon.svg`, `favicon.svg`) and shows the NexoneZ Software House icon (`public/nexonez-icon.png`) as "A product of NexoneZ Software House" (see `src/brand.jsx`). `public/logo.jpg` is the original NexoneZ logo. Colors and fonts live at the top of `src/styles.css` (CSS variables).
+
+## Phones
+
+The app is built for phones first: admins get a slide-in menu, staff get a bottom tab bar, tables turn into cards under 720px, and dialogs become bottom sheets (see the phone section at the end of `src/styles.css`, and `TableLabels` in `src/components.jsx`). Add `className="table cards"` to a new table to get the card layout on phones.

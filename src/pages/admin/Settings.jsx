@@ -208,7 +208,12 @@ export default function Settings() {
                 <div className="small" style={{ marginTop: 4 }}>
                   Use <b>Add my current IP</b> only when you are on the office Wi-Fi. If you are somewhere else, add the office address with the box above instead.
                 </div>
-                {myIp.data?.isPrivate && <div className="small" style={{ marginTop: 4 }}>This address is a private one, so you are probably testing on your own computer.</div>}
+                {myIp.data?.isPrivate && (
+                  <div className="small" style={{ marginTop: 4 }}>
+                    This is a private address, so the server cannot see your real internet IP. Redeploy the latest backend on Render, or you are running it on your own computer.
+                    {myIp.data.seen && <div className="muted" style={{ marginTop: 4, wordBreak: 'break-all' }}>Server sees: {myIp.data.seen.peer || '-'} · forwarded: {myIp.data.seen.forwardedFor || '-'} · edge: {myIp.data.seen.cf || '-'}</div>}
+                  </div>
+                )}
                 <div style={{ marginTop: 10 }} className="row wrap">
                   <button className="btn sm" disabled={!myIp.data?.ip} onClick={() => addIp(myIp.data.ip)}>Add my current IP</button>
                   <button className="btn sm ghost" onClick={myIp.reload}>Check again</button>

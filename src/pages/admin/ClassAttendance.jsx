@@ -62,14 +62,14 @@ function Sheet({ batches }) {
               <div className="stat-line small">{counts.map(([l, n]) => <span key={l}><b>{n}</b> {l.toLowerCase()}</span>)}</div>
             </div>
             <div className="table-wrap">
-              <table className="table">
-                <thead><tr><th style={{ width: 70 }}>Roll</th><th>Student</th><th>Attendance</th></tr></thead>
+              <table className="table cards">
+                <thead><tr><th style={{ width: 70 }} className="hide-m">Roll</th><th>Student</th><th>Attendance</th></tr></thead>
                 <tbody>
                   {rows.map((r) => (
                     <tr key={r.student._id}>
-                      <td className="muted">{r.student.rollNo || '-'}</td>
-                      <td style={{ fontWeight: 600 }}>{r.student.name}</td>
-                      <td>
+                      <td className="muted hide-m">{r.student.rollNo || '-'}</td>
+                      <td className="title" style={{ fontWeight: 600 }}>{r.student.name}{r.student.rollNo && <span className="muted small show-m"> · Roll {r.student.rollNo}</span>}</td>
+                      <td className="full">
                         <div className="seg" role="group" aria-label={`Attendance for ${r.student.name}`}>
                           {OPTIONS.map(([k, l]) => (
                             <button key={k} type="button" className={`${k} ${marks[r.student._id] === k ? 'on' : ''}`} aria-pressed={marks[r.student._id] === k}
@@ -113,13 +113,13 @@ function Summary({ batches }) {
           ) : (
             <>
               <div className="panel-head"><h2>{fmtMonth(month)}</h2><span className="muted">{state.data.classDays} class days recorded</span></div>
-              <table className="table">
-                <thead><tr><th>Roll</th><th>Student</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Attendance</th></tr></thead>
+              <table className="table cards c3">
+                <thead><tr><th className="hide-m">Roll</th><th>Student</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Attendance</th></tr></thead>
                 <tbody>
                   {state.data.items.map((r) => (
                     <tr key={r.student._id}>
-                      <td className="muted">{r.student.rollNo || '-'}</td>
-                      <td style={{ fontWeight: 600 }}>{r.student.name}</td>
+                      <td className="muted hide-m">{r.student.rollNo || '-'}</td>
+                      <td className="title" style={{ fontWeight: 600 }}>{r.student.name}{r.student.rollNo && <span className="muted small show-m"> · Roll {r.student.rollNo}</span>}</td>
                       <td>{r.present}</td><td>{r.late}</td><td>{r.absent}</td><td>{r.leave}</td>
                       <td>
                         {r.percent == null ? '-' : (

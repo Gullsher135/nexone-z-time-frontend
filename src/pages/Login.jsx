@@ -51,7 +51,7 @@ export default function Login() {
           </div>
           {error && <div className="alert bad" role="alert">{error}</div>}
           <Field label="Email">
-            <input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
+            <input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus={!window.matchMedia('(max-width: 720px)').matches} />
           </Field>
           <Field label="Password">
             <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />

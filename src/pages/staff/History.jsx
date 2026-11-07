@@ -35,7 +35,7 @@ export default function History() {
             </div>
 
             <div className="panel table-wrap">
-              <table className="table">
+              <table className="table cards c3">
                 <thead>
                   <tr><th>Date</th><th>Status</th><th>In</th><th>Out</th><th>Hours</th><th>Note</th></tr>
                 </thead>
@@ -46,7 +46,7 @@ export default function History() {
                     .map((r) => (
                       <tr key={r.date} style={r.off && !r.checkIn ? { color: 'var(--ink-3)' } : undefined}>
                         <td className="nowrap">{fmtDate(r.date)}{r.holiday && <span className="muted small"> · {r.holiday}</span>}</td>
-                        <td><StatusChip status={r.status} />{r.lateMinutes > 0 && <span className="muted small"> {r.lateMinutes}m</span>}</td>
+                        <td className="full"><StatusChip status={r.status} />{r.lateMinutes > 0 && <span className="muted small"> {r.lateMinutes}m</span>}</td>
                         <td className="nowrap">{r.checkIn ? to12h(r.checkIn) : '-'}</td>
                         <td className="nowrap">
                           {r.checkOut ? to12h(r.checkOut) : r.missedCheckout ? <span className="chip warn">No check-out</span> : '-'}

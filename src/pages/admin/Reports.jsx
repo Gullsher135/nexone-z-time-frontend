@@ -20,13 +20,13 @@ function Detail({ person, month, onClose }) {
             {state.data.summary.avgCheckIn && <span>usually in at <b>{to12h(state.data.summary.avgCheckIn)}</b></span>}
           </div>
           <div className="table-wrap">
-            <table className="table">
+            <table className="table cards c3">
               <thead><tr><th>Date</th><th>Status</th><th>In</th><th>Out</th><th>Hours</th><th>Note</th></tr></thead>
               <tbody>
                 {state.data.rows.filter((r) => !['na', 'upcoming'].includes(r.status)).map((r) => (
                   <tr key={r.date} style={r.off && !r.checkIn ? { color: 'var(--ink-3)' } : undefined}>
                     <td className="nowrap">{fmtDate(r.date)}</td>
-                    <td><StatusChip status={r.status} />{r.lateMinutes > 0 && <span className="muted small"> {r.lateMinutes}m</span>}</td>
+                    <td className="full"><StatusChip status={r.status} />{r.lateMinutes > 0 && <span className="muted small"> {r.lateMinutes}m</span>}</td>
                     <td className="nowrap">{r.checkIn ? to12h(r.checkIn) : '-'}</td>
                     <td className="nowrap">{r.checkOut ? to12h(r.checkOut) : r.missedCheckout ? <span className="chip warn">No check-out</span> : '-'}</td>
                     <td className="nowrap">{r.workMinutes ? fmtDuration(r.workMinutes) : '-'}</td>
@@ -81,7 +81,7 @@ export default function Reports() {
           {state.data && (state.data.items.length === 0 ? (
             <Empty title="No staff yet">Add employees or interns on the People page.</Empty>
           ) : (
-            <table className="table">
+            <table className="table cards c3">
               <thead>
                 <tr><th>Person</th><th>Days</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Hours</th><th>Usually in</th><th>Attendance</th></tr>
               </thead>

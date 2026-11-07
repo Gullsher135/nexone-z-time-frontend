@@ -1,6 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
+import { Icon } from '../components.jsx';
 import { ProductOf, TimeBrand } from '../brand.jsx';
+
+const tabs = [
+  { to: '/', label: 'Today', icon: Icon.home, end: true },
+  { to: '/history', label: 'History', icon: Icon.clock },
+  { to: '/leaves', label: 'Leave', icon: Icon.leave },
+  { to: '/account', label: 'Account', icon: Icon.user },
+];
 
 export default function StaffLayout() {
   const { user, logout } = useAuth();
@@ -9,14 +17,11 @@ export default function StaffLayout() {
       <header className="topbar">
         <div className="topbar-in">
           <TimeBrand sub="" />
-          <nav className="nav" aria-label="Main">
-            <NavLink to="/" end>Today</NavLink>
-            <NavLink to="/history">History</NavLink>
-            <NavLink to="/leaves">Leave</NavLink>
-            <NavLink to="/account">Account</NavLink>
+          <nav className="nav desk-nav" aria-label="Main">
+            {tabs.map((t) => <NavLink key={t.to} to={t.to} end={t.end}>{t.label}</NavLink>)}
           </nav>
           <div className="grow" />
-          <span className="muted small nowrap">{user.name}</span>
+          <span className="muted small nowrap user-name">{user.name}</span>
           <button className="btn sm" onClick={logout}>Log out</button>
         </div>
       </header>
@@ -26,6 +31,14 @@ export default function StaffLayout() {
       <footer className="staff-foot">
         <ProductOf />
       </footer>
+      <nav className="tabbar" aria-label="Main">
+        {tabs.map((t) => (
+          <NavLink key={t.to} to={t.to} end={t.end}>
+            {t.icon}
+            <span>{t.label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }
