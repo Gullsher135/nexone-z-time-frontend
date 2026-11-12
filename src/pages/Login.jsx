@@ -4,6 +4,8 @@ import { useAuth } from '../lib/auth.jsx';
 import { Field } from '../components.jsx';
 import { ProductOf } from '../brand.jsx';
 
+const home = (u) => (u.role === 'admin' ? '/hub' : u.role === 'student' ? '/learn' : '/');
+
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
@@ -13,7 +15,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to={location.state?.from || (user.role === 'admin' ? '/admin' : '/')} replace />;
+  if (user) return <Navigate to={location.state?.from || home(user)} replace />;
 
   async function submit(e) {
     e.preventDefault();
@@ -21,8 +23,8 @@ export default function Login() {
     setError('');
     try {
       const u = await login(email, password);
-      const dest = location.state?.from || (u.role === 'admin' ? '/admin' : '/');
-      navigate(u.mustChangePassword ? (u.role === 'admin' ? '/admin/account' : '/account') : dest, { replace: true });
+      const dest = location.state?.from || home(u);
+      navigate(u.mustChangePassword ? (u.role === 'admin' ? '/admin/account' : u.role === 'student' ? '/learn/account' : '/account') : dest, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -34,20 +36,24 @@ export default function Login() {
     <div className="auth">
       <section className="auth-side">
         <div className="auth-brand">
-          <img src="/time-icon.svg" alt="NexoneZ Time" />
-          <span>NexoneZ Time</span>
+          <img src="/hub-icon.svg" alt="NexoneZ Hub" />
+          <span>NexoneZ Hub</span>
         </div>
         <div>
-          <h1>Every working hour, accounted for.</h1>
-          <p>Check in when you arrive, check out when you leave. Your hours and attendance are always up to date.</p>
+          <h1>One place to run the whole software house.</h1>
+          <p>Attendance, learning and more, built by NexoneZ for the people who work and study here.</p>
+          <div className="auth-mods">
+            <span><img src="/time-icon.svg" alt="" />Time</span>
+            <span><img src="/learn-icon.svg" alt="" />Learn</span>
+          </div>
         </div>
         <ProductOf className="on-dark" />
       </section>
       <section className="auth-main">
         <form className="auth-card stack" onSubmit={submit}>
           <div>
-            <h2>Log in to NexoneZ Time</h2>
-            <p className="muted">Use the email and password given to you by the admin.</p>
+            <h2>Log in to NexoneZ Hub</h2>
+            <p className="muted">Staff and students: use the email and password given to you by the admin.</p>
           </div>
           {error && <div className="alert bad" role="alert">{error}</div>}
           <Field label="Email">

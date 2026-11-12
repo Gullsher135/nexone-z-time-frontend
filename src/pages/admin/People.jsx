@@ -14,7 +14,7 @@ const TABS = [
 
 function Credentials({ info, onClose }) {
   const toast = useToast();
-  const text = `NexoneZ Attendance\nEmail: ${info.email}\nTemporary password: ${info.password}\nYou will be asked to choose your own password after logging in.`;
+  const text = `NexoneZ Hub\nEmail: ${info.email}\nTemporary password: ${info.password}\nYou will be asked to choose your own password after logging in.`;
   return (
     <Modal title="Login details" onClose={onClose} footer={<button className="btn primary" onClick={onClose}>Done</button>}>
       <div className="stack">
@@ -42,7 +42,7 @@ function PersonForm({ role, person, batches, onClose, onSaved }) {
     internStart: p?.internship?.startDate || todayKey(), internEnd: p?.internship?.endDate || '', mentor: p?.internship?.mentor || '',
     batch: p?.batch?._id || p?.batch || '', rollNo: p?.rollNo || '', admissionDate: p?.admissionDate || todayKey(),
     guardianName: p?.guardianName || '', guardianPhone: p?.guardianPhone || '',
-    password: '',
+    password: '', createLogin: false,
   });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -63,6 +63,7 @@ function PersonForm({ role, person, batches, onClose, onSaved }) {
     }
     if (role === 'intern') body.internship = { startDate: f.internStart, endDate: f.internEnd || undefined, mentor: f.mentor };
     if (role === 'student') {
+      if (!p && f.createLogin) { body.createLogin = true; if (f.password) body.password = f.password; }
       Object.assign(body, { batch: f.batch || undefined, rollNo: f.rollNo, admissionDate: f.admissionDate, guardianName: f.guardianName, guardianPhone: f.guardianPhone });
     }
     try {
@@ -90,7 +91,7 @@ function PersonForm({ role, person, batches, onClose, onSaved }) {
         {error && <div className="alert bad" role="alert">{error}</div>}
         <div className="form-grid">
           <Field label="Full name"><input type="text" value={f.name} onChange={set('name')} required /></Field>
-          <Field label={staff ? 'Email (used to log in)' : 'Email (optional)'}><input type="email" value={f.email} onChange={set('email')} required={staff} /></Field>
+          <Field label={staff ? 'Email (used to log in)' : 'Email (needed for a learning login)'}><input type="email" value={f.email} onChange={set('email')} required={staff} /></Field>
           <Field label="Phone"><input type="tel" value={f.phone} onChange={set('phone')} /></Field>
           <Field label="CNIC (optional)"><input type="text" value={f.cnic} onChange={set('cnic')} placeholder="00000-0000000-0" /></Field>
 
@@ -124,7 +125,12 @@ function PersonForm({ role, person, batches, onClose, onSaved }) {
               </Field>
               <Field label="Roll number"><input type="text" value={f.rollNo} onChange={set('rollNo')} /></Field>
               <Field label="Admission date"><input type="date" value={f.admissionDate} onChange={set('admissionDate')} /></Field>
-              <div />
+              {!p && (
+                <label className="check full"><input type="checkbox" checked={f.createLogin} onChange={(e) => setF((x) => ({ ...x, createLogin: e.target.checked }))} /> Give this student a login for NexoneZ Learn (needs email)</label>
+              )}
+              {!p && f.createLogin && (
+                <Field label="Password" hint="Leave empty to generate a temporary one." full><input type="text" value={f.password} onChange={set('password')} minLength={8} autoComplete="off" /></Field>
+              )}
               <Field label="Parent or guardian"><input type="text" value={f.guardianName} onChange={set('guardianName')} /></Field>
               <Field label="Guardian phone"><input type="tel" value={f.guardianPhone} onChange={set('guardianPhone')} /></Field>
             </>
@@ -329,7 +335,7 @@ export default function People() {
                     <td><span className={`chip ${u.isActive ? 'ok' : 'muted'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td className="r nowrap">
                       <button className="btn sm" onClick={() => setEditing(u)}>Edit</button>{' '}
-                      {u.role !== 'student' && <button className="btn sm" onClick={() => reset(u)}>Reset password</button>}{' '}
+                      {(u.role !== 'student' || u.email) && <button className="btn sm" onClick={() => reset(u)}>{u.role === 'student' ? 'Login / reset password' : 'Reset password'}</button>}{' '}
                       <button className="btn sm" onClick={() => toggle(u)}>{u.isActive ? 'Deactivate' : 'Activate'}</button>{' '}
                       <button className="btn sm danger" onClick={() => remove(u)}>Delete</button>
                     </td>

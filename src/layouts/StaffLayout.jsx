@@ -3,15 +3,16 @@ import { useAuth } from '../lib/auth.jsx';
 import { Icon } from '../components.jsx';
 import { ProductOf, TimeBrand } from '../brand.jsx';
 
-const tabs = [
-  { to: '/', label: 'Today', icon: Icon.home, end: true },
-  { to: '/history', label: 'History', icon: Icon.clock },
-  { to: '/leaves', label: 'Leave', icon: Icon.leave },
-  { to: '/account', label: 'Account', icon: Icon.user },
+const baseTabs = [
+  { to: '/time', label: 'Today', icon: Icon.clock, end: true },
+  { to: '/time/history', label: 'History', icon: Icon.chart },
+  { to: '/time/leaves', label: 'Leave', icon: Icon.leave },
+  { to: '/', label: 'Portal', icon: Icon.home, end: true },
 ];
 
 export default function StaffLayout() {
   const { user, logout } = useAuth();
+  const tabs = baseTabs;
   return (
     <div className="staff-shell">
       <header className="topbar">

@@ -25,7 +25,7 @@ export default function Account() {
       await refresh();
       toast('Password changed');
       setForm({ currentPassword: '', newPassword: '', confirm: '' });
-      if (user.mustChangePassword) navigate(user.role === 'admin' ? '/admin' : '/', { replace: true });
+      if (user.mustChangePassword) navigate(user.role === 'admin' ? '/hub' : user.role === 'student' ? '/learn' : '/', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

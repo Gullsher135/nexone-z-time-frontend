@@ -73,3 +73,7 @@ export const ROLE_LABEL = { admin: 'Admin', employee: 'Employee', intern: 'Inter
 
 const hhmmFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false });
 export const hhmmFromIso = (iso) => (iso ? hhmmFmt.format(new Date(iso)).replace('24:', '00:') : null);
+
+export const rs = (n) => `Rs ${Math.round(Number(n) || 0).toLocaleString('en-PK')}`;
+export const monthLabel = (m) => new Date(`${m}-01T12:00:00`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+export const METHOD_LABEL = { cash: 'Cash', bank: 'Bank transfer', jazzcash: 'JazzCash', easypaisa: 'Easypaisa', other: 'Other' };

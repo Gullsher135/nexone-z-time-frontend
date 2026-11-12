@@ -134,7 +134,7 @@ export default function Today() {
             <section className="panel panel-pad stack">
               <div className="row between wrap">
                 <h2>This month</h2>
-                <Link to="/history">See every day</Link>
+                <Link to="/time/history">See every day</Link>
               </div>
               {month.data ? (
                 <div className="facts">

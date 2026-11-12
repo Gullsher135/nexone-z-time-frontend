@@ -18,6 +18,15 @@ function Section({ title, hint, children, onSave, busy }) {
   );
 }
 
+function fmtAgo(d) {
+  if (!d) return 'never';
+  const m = Math.max(0, Math.round((Date.now() - new Date(d).getTime()) / 60000));
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+}
+
 export default function Settings() {
   const toast = useToast();
   const state = useAsync(() => api.get('/settings'), []);
@@ -39,6 +48,9 @@ export default function Settings() {
         office: { name: x.office?.name || '', lat: x.office?.lat ?? '', lng: x.office?.lng ?? '', radiusMeters: x.office?.radiusMeters ?? 150, enforceGeofence: !!x.office?.enforceGeofence },
         allowedIps: (x.allowedIps || []).join('\n'),
         enforceIp: !!x.enforceIp,
+        autoIpEnabled: !!x.autoIpEnabled,
+        autoIp: x.autoIp || null,
+        officeSyncKey: x.officeSyncKey || '',
         requireQr: !!x.requireQr,
       });
     }
@@ -56,6 +68,17 @@ export default function Settings() {
       setBusy('');
     }
   }
+
+  async function makeKey() {
+    try {
+      const r = await api.post('/settings/office-sync-key');
+      setS((x) => ({ ...x, officeSyncKey: r.settings.officeSyncKey }));
+      toast('New office link created');
+    } catch (e) {
+      toast(e.message, 'bad');
+    }
+  }
+  const copyText = async (t) => { try { await navigator.clipboard.writeText(t); } catch { window.prompt('Copy this link', t); } };
 
   function useMyLocation() {
     if (!navigator.geolocation) return toast('This device cannot share its location', 'bad');
@@ -189,9 +212,40 @@ export default function Settings() {
             </Section>
 
             <Section title="Office network check" hint="Allow the Check in button only from your office internet connection." busy={busy === 'ip'}
-              onSave={() => save('ip', { allowedIps: s.allowedIps, enforceIp: s.enforceIp })}>
+              onSave={() => save('ip', { allowedIps: s.allowedIps, enforceIp: s.enforceIp, autoIpEnabled: s.autoIpEnabled })}>
               <div className="stepbox">
-                <div className="stepbox-title">Add the office internet address (works from anywhere)</div>
+                <div className="stepbox-title">Keep the office address updated automatically (recommended)</div>
+                <p className="small">
+                  Office internet often gets a new address after a restart, or on some days. With this on, a device that stays at the office (a PC, laptop or old phone) opens a private link
+                  and tells the server the office&apos;s current address every minute. Staff keep passing the network check without you changing anything. No login and no QR code are needed.
+                </p>
+                <label className="check"><input type="checkbox" checked={s.autoIpEnabled} onChange={(e) => setS((x) => ({ ...x, autoIpEnabled: e.target.checked }))} /> Update the office IP automatically from a device at the office</label>
+                {s.autoIpEnabled && (
+                  <div style={{ marginTop: 10 }}>
+                    <div className="small">
+                      {s.autoIp?.ip
+                        ? <>Current office address: <b className="num">{s.autoIp.ip}</b>, last reported {fmtAgo(s.autoIp.seenAt)}.</>
+                        : <>No device has reported yet.</>}
+                    </div>
+                    {s.officeSyncKey ? (
+                      <>
+                        <div className="small" style={{ marginTop: 10 }}>Open this link <b>on the office device</b> and leave the page open:</div>
+                        <input type="text" readOnly value={`${window.location.origin}/office-sync/${s.officeSyncKey}`} onFocus={(e) => e.target.select()} aria-label="Office device link" style={{ marginTop: 6 }} />
+                        <div className="row wrap" style={{ marginTop: 8 }}>
+                          <button className="btn sm primary" onClick={() => copyText(`${window.location.origin}/office-sync/${s.officeSyncKey}`).then(() => toast('Link copied'))}>Copy link</button>
+                          <button className="btn sm" onClick={makeKey}>Make a new link</button>
+                        </div>
+                        <p className="muted small" style={{ marginTop: 6 }}>Keep this link private. If someone else gets it, press <b>Make a new link</b> and open the new one at the office. The old one stops working.</p>
+                      </>
+                    ) : (
+                      <div className="row wrap" style={{ marginTop: 8 }}><button className="btn sm primary" onClick={makeKey}>Create the office link</button></div>
+                    )}
+                    <p className="muted small" style={{ marginTop: 6 }}>Remember to press <b>Save</b> below after turning this on.</p>
+                  </div>
+                )}
+              </div>
+              <div className="stepbox">
+                <div className="stepbox-title">Or add a fixed office internet address by hand (works from anywhere)</div>
                 <p className="small">
                   Staff are checked against the <b>public IP address</b> of the office internet connection, not the Wi-Fi name and not the router login address (such as 192.168.1.1).
                   On the router, open <b>Status, Internet or WAN</b> and copy the <b>IP Address</b> shown there. It must not start with 192.168, 10., 172.16 to 172.31 or 100.64 to 100.127.
@@ -219,7 +273,7 @@ export default function Settings() {
                   <button className="btn sm ghost" onClick={myIp.reload}>Check again</button>
                 </div>
               </div>
-              <Field label="Allowed IP addresses" hint="One per line. Use * at the end to match a range, such as 203.0.113.*. An office internet connection can change its address now and then unless you ask your internet provider for a fixed (static) IP; if staff are refused at the office, add the new address.">
+              <Field label="Allowed IP addresses (added by hand)" hint="One per line. Use * at the end to match a range, such as 203.0.113.*. An office internet connection can change its address now and then unless you ask your internet provider for a fixed (static) IP; if staff are refused at the office, add the new address.">
                 <textarea value={s.allowedIps} onChange={(e) => setS((x) => ({ ...x, allowedIps: e.target.value }))} placeholder="203.0.113.25" />
               </Field>
               {privateLines.length > 0 && (

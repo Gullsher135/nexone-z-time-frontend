@@ -39,7 +39,7 @@ export default function Scan() {
             <div className="alert bad" role="alert">{state.error}</div>
           </>
         )}
-        {!state.loading && <Link className="btn primary" to="/">Go to my day</Link>}
+        {!state.loading && <Link className="btn primary" to="/time">Go to my day</Link>}
       </div>
     </div>
   );
