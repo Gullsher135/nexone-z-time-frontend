@@ -6,6 +6,7 @@ const items = [
   { sep: true },
   { to: '/admin/crew', label: 'Notices', icon: Icon.leave, end: true },
   { to: '/admin/crew/tasks', label: 'Tasks', icon: Icon.check },
+  { to: '/admin/crew/letters', label: 'Letters', icon: Icon.book },
   { to: '/admin/crew/policy', label: 'Leave policy', icon: Icon.gear },
   { to: '/admin/people', label: 'People', icon: Icon.people },
   { to: '/admin/leaves', label: 'Leave requests', icon: Icon.leave },

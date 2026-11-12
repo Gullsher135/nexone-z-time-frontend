@@ -70,8 +70,14 @@ function PersonForm({ role, person, batches, onClose, onSaved }) {
       if (p) {
         const { role: _r, ...rest } = body;
         await api.patch(`/users/${p._id}`, rest);
-        toast('Changes saved');
-        onSaved();
+        if (role === 'student' && f.password) {
+          const r = await api.post(`/users/${p._id}/reset-password`, { password: f.password });
+          toast('Changes saved and login set');
+          onSaved({ name: f.name, email: f.email, password: r.tempPassword });
+        } else {
+          toast('Changes saved');
+          onSaved();
+        }
       } else {
         const r = await api.post('/users', body);
         toast(`${ROLE_LABEL[role]} added`);
@@ -127,6 +133,9 @@ function PersonForm({ role, person, batches, onClose, onSaved }) {
               <Field label="Admission date"><input type="date" value={f.admissionDate} onChange={set('admissionDate')} /></Field>
               {!p && (
                 <label className="check full"><input type="checkbox" checked={f.createLogin} onChange={(e) => setF((x) => ({ ...x, createLogin: e.target.checked }))} /> Give this student a login for NexoneZ Learn (needs email)</label>
+              )}
+              {p && (
+                <Field label="Login password" hint={f.email ? 'Optional. Type a password (8+ characters) to give this student a login or change it. Leave empty to keep as is.' : 'Add the email above first, then you can set a password.'} full><input type="text" value={f.password} onChange={set('password')} minLength={8} autoComplete="off" disabled={!f.email} /></Field>
               )}
               {!p && f.createLogin && (
                 <Field label="Password" hint="Leave empty to generate a temporary one." full><input type="text" value={f.password} onChange={set('password')} minLength={8} autoComplete="off" /></Field>

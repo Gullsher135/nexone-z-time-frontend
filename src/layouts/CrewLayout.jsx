@@ -13,6 +13,7 @@ export default function CrewLayout() {
     { to: '/notices', label: 'Notices', icon: Icon.leave },
     { to: '/team', label: 'Team', icon: Icon.people },
     { to: '/payslips', label: 'Payslips', icon: Icon.chart },
+    { to: '/letters', label: 'My letters', icon: Icon.book },
     { to: '/profile', label: 'My profile', icon: Icon.user },
     { sep: true },
     { to: '/time', label: 'Check in / out', icon: Icon.clock, end: true },

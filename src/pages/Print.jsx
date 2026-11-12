@@ -3,6 +3,7 @@ import { api } from '../lib/api.js';
 import { useAsync } from '../lib/useAsync.js';
 import { Loading } from '../components.jsx';
 import { fmtDate, METHOD_LABEL, monthLabel, rs } from '../lib/format.js';
+import { Certificate, LetterSheet, internshipProps } from '../documents.jsx';
 
 function Sheet({ title, children, meta }) {
   return (
@@ -80,6 +81,22 @@ export function PayslipDoc() {
           <div className="doc-amount"><span>Net salary{s.method ? ` (${METHOD_LABEL[s.method]})` : ''}</span><b>{rs(s.net)}</b></div>
           <div className="doc-sign"><span>Prepared by NexoneZ Hub</span><span>Employee signature</span></div>
         </Sheet>
+      )}
+    </Loading>
+  );
+}
+
+export function LetterDoc() {
+  const { id } = useParams();
+  const state = useAsync(() => api.get(`/docs/letters/${id}`), [id]);
+  const l = state.data?.letter;
+  return (
+    <Loading state={state}>
+      {l && (
+        <div className={l.type === 'internship' ? 'letter-wrap cert-page' : 'letter-wrap letter-page'}>
+          <div className="no-print print-bar"><button className="btn primary" onClick={() => window.print()}>Print or save as PDF</button>{l.status === 'revoked' && <span className="chip bad" style={{ marginLeft: 10 }}>Revoked</span>}</div>
+          {l.type === 'internship' ? <div className="cert-center"><Certificate {...internshipProps(l)} /></div> : <LetterSheet letter={l} />}
+        </div>
       )}
     </Loading>
   );

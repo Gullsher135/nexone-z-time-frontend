@@ -33,7 +33,9 @@ import Payroll from './pages/pay/Payroll.jsx';
 import Salaries from './pages/pay/Salaries.jsx';
 import MyFees from './pages/learn/MyFees.jsx';
 import Payslips from './pages/crew/Payslips.jsx';
-import { Receipt, PayslipDoc } from './pages/Print.jsx';
+import { Receipt, PayslipDoc, LetterDoc } from './pages/Print.jsx';
+import AdminLetters from './pages/crew/AdminLetters.jsx';
+import MyLetters from './pages/crew/MyLetters.jsx';
 import CrewLayout from './layouts/CrewLayout.jsx';
 import AdminCrewLayout from './layouts/AdminCrewLayout.jsx';
 import CrewHome from './pages/crew/CrewHome.jsx';
@@ -81,6 +83,7 @@ export default function App() {
       <Route element={<Protected />}>
         <Route path="/print/receipt/:id" element={<Receipt />} />
         <Route path="/print/payslip/:id" element={<PayslipDoc />} />
+        <Route path="/print/letter/:id" element={<LetterDoc />} />
       </Route>
       <Route path="/verify/:code" element={<Verify />} />
 
@@ -110,6 +113,7 @@ export default function App() {
           <Route path="notices" element={<Notices />} />
           <Route path="team" element={<Team />} />
           <Route path="payslips" element={<Payslips />} />
+          <Route path="letters" element={<MyLetters />} />
           <Route path="profile" element={<Profile />} />
           <Route path="account" element={<Account />} />
         </Route>
@@ -144,6 +148,7 @@ export default function App() {
           <Route index element={<AdminNotices />} />
           <Route path="tasks" element={<AdminTasks />} />
           <Route path="policy" element={<AdminPolicy />} />
+          <Route path="letters" element={<AdminLetters />} />
         </Route>
         <Route path="/admin/learn" element={<LearnAdminLayout />}>
           <Route index element={<LearnAdminHome />} />
