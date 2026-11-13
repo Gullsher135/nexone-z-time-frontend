@@ -667,6 +667,64 @@ a.hub-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(22,
   .letter { box-shadow: none; width: 100%; min-height: 100vh; }
 }
 
+/* ================= Course completion certificate (NexoneZ Learn) ================= */
+.nzc { position: relative; width: 100%; max-width: 960px; aspect-ratio: 3 / 2; container-type: inline-size; overflow: hidden; background: #fff; border-radius: 4px; box-shadow: 0 20px 60px rgba(22, 20, 58, .18); color: #1b1464; font-family: var(--font-body); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.nzc-art { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.nzc-tagline { position: absolute; right: 3.2cqw; top: 1.5cqw; color: #fff; font: italic 500 1.55cqw/1 'Playfair Display', Georgia, serif; letter-spacing: .02em; }
+.nzc-tagline i { margin: 0 .5cqw; font-style: normal; }
+.nzc-content { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.3cqw 9cqw 0; }
+.nzc-brand { position: relative; display: flex; align-items: center; justify-content: center; height: 8.8cqw; width: 100%; }
+.nzc-brand::before, .nzc-brand::after { content: ''; position: absolute; top: 7.2cqw; height: .14cqw; width: 10cqw; background: #4a24d6; }
+.nzc-brand::before { left: 14.5cqw; } .nzc-brand::after { right: 13.2cqw; }
+.nzc-brand img { width: 10cqw; height: 10cqw; object-fit: contain; margin-right: .6cqw; }
+.nzc-brand-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; }
+.nzc-brand-text b { font-family: var(--font-display); font-weight: 700; font-size: 5.6cqw; letter-spacing: -.02em; color: #1b1464; line-height: 1; } .nzc-brand-text b span { color: #5b21d6; }
+.nzc-brand-text > span { font-size: 1.32cqw; font-weight: 700; color: #1b1464; margin-top: .9cqw; letter-spacing: .01em; }
+.nzc h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 5.8cqw; line-height: .95; letter-spacing: .07em; text-transform: uppercase; margin: 1.1cqw 0 0; color: #1b1464; }
+.nzc-of { display: flex; align-items: center; justify-content: center; margin-top: .7cqw; font-weight: 700; font-size: 2.45cqw; line-height: 1.1; letter-spacing: .42em; color: #4a24d6; padding-left: .42em; }
+.nzc-of i { display: block; width: 13cqw; height: .14cqw; background: #4a24d6; margin: 0 2.2cqw; }
+.nzc-lead { margin: 1cqw 0 0; font: italic 500 2cqw/1.2 'Playfair Display', Georgia, serif; }
+.nzc-name { position: relative; margin-top: .3cqw; font-family: 'Great Vibes', cursive; line-height: 1.05; padding: 0 3cqw .35cqw; min-width: 59cqw; border-bottom: .14cqw solid #d9a93a; color: #1b1464; }
+.nzc-name::after { content: ''; position: absolute; left: 50%; bottom: -.62cqw; width: .9cqw; height: .9cqw; background: #e2a92e; transform: translateX(-50%) rotate(45deg); }
+.nzc-txt { margin: .9cqw 0 0; font-size: 1.8cqw; line-height: 1.2; font-weight: 500; }
+.nzc-txt + .nzc-field, .nzc-course + .nzc-txt { margin-top: .5cqw; }
+.nzc-course { margin-top: .4cqw; font-family: var(--font-display); font-weight: 600; line-height: 1.2; color: #4a24d6; }
+.nzc-field { margin-top: .3cqw; font-weight: 700; font-size: 1.9cqw; line-height: 1.2; color: #4a24d6; }
+.nzc-note { margin: .7cqw 0 0; font: italic 500 1.72cqw/1.28 'Playfair Display', Georgia, serif; }
+.nzc-foot { position: absolute; left: 0; right: 0; bottom: 2.1cqw; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 12.5cqw 0 5cqw; }
+.nzc-left { display: flex; align-items: flex-end; width: 40cqw; }
+.nzc-qr { width: 8.2cqw; flex: none; text-align: center; margin: 0 2.6cqw 0 0; }
+.nzc-qr svg { display: block; padding: .5cqw; background: #fff; border: .13cqw solid #d9d2f5; border-radius: .5cqw; }
+.nzc-qr span { display: block; margin-top: .3cqw; font-size: .95cqw; color: #5b5780; letter-spacing: .04em; }
+.nzc-date { min-width: 0; }
+.nzc-date-row { display: flex; align-items: center; gap: 1cqw; padding-bottom: .8cqw; border-bottom: .14cqw solid #4a24d6; }
+.nzc-cal { width: 2.8cqw; height: 2.8cqw; flex: none; }
+.nzc-date small { display: block; font-size: 1.45cqw; font-weight: 500; line-height: 1.2; }
+.nzc-date b { display: block; font-size: 1.6cqw; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+.nzc-id { margin-top: .5cqw; font-size: 1cqw; color: #5b5780; letter-spacing: .03em; }
+.nzc-seal { width: 12.2cqw; height: auto; flex: none; margin: 0 0 -.3cqw; }
+.nzc-sign { width: 17.5cqw; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.nzc-sign img { width: 13.5cqw; height: auto; display: block; margin-bottom: -.3cqw; }
+.nzc-sign-line { width: 100%; border-top: .14cqw solid #4a24d6; margin-bottom: .6cqw; }
+.nzc-sign b { font-size: 1.5cqw; font-weight: 700; }
+@media print {
+  .nzc { max-width: none; width: 297mm; margin: 6mm auto 0; border-radius: 0; box-shadow: none; }
+}
+
+/* progress breakdown (attendance + assignments + quizzes) */
+.pd-big { font-family: var(--font-display); font-weight: 700; font-size: 46px; line-height: 1.05; }
+.pd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.pd-card { display: flex; flex-direction: column; gap: 10px; }
+.pd-num { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1; }
+.pd-weak .pbar i { background: var(--bad); }
+.pd-list { display: flex; flex-direction: column; }
+.pd-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line-2); font-size: 14px; }
+.pd-item .grow { min-width: 0; overflow-wrap: anywhere; }
+.mini-parts { display: flex; gap: 6px; flex-wrap: wrap; }
+.mini-parts .chip { font-size: 12px; }
+.mini-parts .chip::before { display: none; }
+@media (max-width: 960px) { .pd-grid { grid-template-columns: minmax(0, 1fr); } }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }

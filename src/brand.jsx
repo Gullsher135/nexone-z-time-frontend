@@ -58,13 +58,13 @@ export function ModuleIcon({ m, size = 34 }) {
 }
 
 // The strip at the top of every sidebar: the hub, then its modules. `links` says where each live module opens.
-export function ModuleSwitch({ current, links }) {
+export function ModuleSwitch({ current, links, hideUnlinked = false }) {
   const cur = moduleOf(current);
   return (
     <div className="modswitch">
       <HubBrand sub="" />
       <div className="mods" role="navigation" aria-label="Modules">
-        {MODULES.map((m) => {
+        {MODULES.filter((m) => !hideUnlinked || links[m.key]).map((m) => {
           const to = links[m.key];
           const on = m.key === current;
           if (!to) {

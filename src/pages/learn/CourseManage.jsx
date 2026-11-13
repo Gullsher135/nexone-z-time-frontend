@@ -6,9 +6,11 @@ import { useAuth } from '../../lib/auth.jsx';
 import { useToast } from '../../lib/toast.jsx';
 import { fmtDate } from '../../lib/format.js';
 import { Cover, Empty, Field, Loading, Modal, ProgressBar, Tabs, LEVEL_LABEL } from '../../components.jsx';
+import ProgressDetail, { PART_LABEL, PART_SHORT } from './ProgressDetail.jsx';
 
 const TABS = [
   { value: 'content', label: 'Lessons' },
+  { value: 'batches', label: 'Batches' },
   { value: 'students', label: 'Students' },
   { value: 'assignments', label: 'Assignments' },
   { value: 'quizzes', label: 'Quizzes' },
@@ -120,38 +122,154 @@ function Curriculum({ course, reload }) {
   );
 }
 
+// ---------- Batches (they live inside the course) ----------
+function BatchForm({ course, batch, onClose, onSaved }) {
+  const toast = useToast();
+  const [f, setF] = useState({ name: batch?.name || '', instructor: batch?.instructor || '', schedule: batch?.schedule || '', startDate: batch?.startDate || '', endDate: batch?.endDate || '', isActive: batch?.isActive ?? true });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
+  async function save(e) {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      if (batch) await api.patch(`/lms/courses/${course._id}/batches/${batch._id}`, f); else await api.post(`/lms/courses/${course._id}/batches`, f);
+      toast(batch ? 'Batch updated' : 'Batch created');
+      onSaved();
+    } catch (err) { setError(err.message); setBusy(false); }
+  }
+  return (
+    <Modal title={batch ? 'Edit batch' : 'New batch'} onClose={onClose}
+      footer={<><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" form="cbatch-form" disabled={busy}>{busy ? 'Saving...' : 'Save batch'}</button></>}>
+      <form id="cbatch-form" className="stack" onSubmit={save}>
+        {error && <div className="alert bad" role="alert">{error}</div>}
+        <div className="form-grid">
+          <Field label="Batch name" full><input type="text" value={f.name} onChange={set('name')} required autoFocus placeholder="Batch 1" /></Field>
+          <Field label="Instructor"><input type="text" value={f.instructor} onChange={set('instructor')} /></Field>
+          <Field label="Class timing"><input type="text" value={f.schedule} onChange={set('schedule')} placeholder="Mon to Fri, 4 to 6 pm" /></Field>
+          <Field label="Start date"><input type="date" value={f.startDate} onChange={set('startDate')} /></Field>
+          <Field label="End date"><input type="date" value={f.endDate} onChange={set('endDate')} /></Field>
+          <label className="check full"><input type="checkbox" checked={f.isActive} onChange={(e) => setF((x) => ({ ...x, isActive: e.target.checked }))} /> Batch is running</label>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function LinkBatch({ course, options, onClose, onDone }) {
+  const toast = useToast();
+  const [id, setId] = useState(options[0]?._id || '');
+  const [busy, setBusy] = useState(false);
+  async function go() {
+    setBusy(true);
+    try { const r = await api.post(`/lms/courses/${course._id}/batches/link`, { batchId: id }); toast(`Batch added. ${r.enrolled} student${r.enrolled === 1 ? '' : 's'} enrolled.`); onDone(); } catch (e) { toast(e.message, 'bad'); setBusy(false); }
+  }
+  return (
+    <Modal title="Add an existing batch" onClose={onClose}
+      footer={<><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={go} disabled={busy || !id}>{busy ? 'Adding...' : 'Add to this course'}</button></>}>
+      <div className="stack">
+        <p className="muted">These batches were created before batches belonged to courses. Everyone already in the chosen batch is enrolled in this course.</p>
+        <Field label="Batch"><select value={id} onChange={(e) => setId(e.target.value)}>{options.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}</select></Field>
+      </div>
+    </Modal>
+  );
+}
+
+function Batches({ course }) {
+  const toast = useToast();
+  const state = useAsync(() => api.get(`/lms/courses/${course._id}/batches`), [course._id]);
+  const [editing, setEditing] = useState(null); // null | 'new' | batch
+  const [linking, setLinking] = useState(false);
+  async function remove(b) {
+    if (!window.confirm(`Delete ${b.name}?`)) return;
+    try { await api.del(`/lms/courses/${course._id}/batches/${b._id}`); toast('Batch deleted'); state.reload(); } catch (e) { toast(e.message, 'bad'); }
+  }
+  const d = state.data;
+  return (
+    <>
+      <div className="row" style={{ marginBottom: 12, gap: 8, flexWrap: 'wrap' }}>
+        <div className="grow muted">Batches of this course. Class attendance is taken per batch, and counts towards each student's progress here.</div>
+        {d?.linkable.length > 0 && <button className="btn" onClick={() => setLinking(true)}>Add existing batch</button>}
+        <button className="btn primary" onClick={() => setEditing('new')}>New batch</button>
+      </div>
+      <Loading state={state}>
+        {d && (d.items.length === 0 ? (
+          <div className="panel"><Empty title="No batches in this course yet">Create a batch, then enrol students into it from the Students tab.</Empty></div>
+        ) : (
+          <div className="panel table-wrap">
+            <table className="table cards">
+              <thead><tr><th>Batch</th><th>Instructor</th><th>Timing</th><th>Dates</th><th>Students</th><th>Status</th><th /></tr></thead>
+              <tbody>
+                {d.items.map((b) => (
+                  <tr key={b._id}>
+                    <td className="full"><div className="title" style={{ fontWeight: 600 }}>{b.name}</div></td>
+                    <td>{b.instructor || '-'}</td>
+                    <td>{b.schedule || '-'}</td>
+                    <td className="nowrap small">{b.startDate ? fmtDate(b.startDate) : '-'}{b.endDate && ` to ${fmtDate(b.endDate)}`}</td>
+                    <td>{b.studentCount}</td>
+                    <td><span className={`chip ${b.isActive ? 'ok' : 'muted'}`}>{b.isActive ? 'Running' : 'Finished'}</span></td>
+                    <td className="r nowrap">
+                      <button className="btn sm" onClick={() => setEditing(b)}>Edit</button>{' '}
+                      <button className="btn sm ghost" onClick={() => remove(b)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+        {d?.withoutBatch > 0 && <p className="muted small" style={{ marginTop: 10 }}>{d.withoutBatch} enrolled student{d.withoutBatch === 1 ? ' is' : 's are'} not placed in a batch of this course.</p>}
+      </Loading>
+      {editing && <BatchForm course={course} batch={editing === 'new' ? null : editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); state.reload(); }} />}
+      {linking && <LinkBatch course={course} options={d.linkable} onClose={() => setLinking(false)} onDone={() => { setLinking(false); state.reload(); }} />}
+    </>
+  );
+}
+
 // ---------- Students ----------
 function EnrollModal({ course, onClose, onDone }) {
   const toast = useToast();
   const pool = useAsync(() => api.get('/lms/pool'), []);
+  const batches = useAsync(() => api.get(`/lms/courses/${course._id}/batches`), [course._id]);
   const [batchId, setBatchId] = useState('');
   const [picked, setPicked] = useState(new Set());
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState(false);
   const list = useMemo(() => (pool.data?.students || []).filter((s) => !q || `${s.name} ${s.code} ${s.rollNo || ''}`.toLowerCase().includes(q.toLowerCase())), [pool.data, q]);
   const toggle = (id) => setPicked((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const allShown = list.length > 0 && list.every((s) => picked.has(s._id));
+  const toggleAll = () => setPicked((p) => { const n = new Set(p); list.forEach((s) => (allShown ? n.delete(s._id) : n.add(s._id))); return n; });
+  const courseBatches = batches.data?.items || [];
+  useEffect(() => { if (!batchId && courseBatches.length) setBatchId(courseBatches[0]._id); }, [batches.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function go() {
     setBusy(true);
     try {
-      const r = await api.post(`/lms/courses/${course._id}/enroll`, { studentIds: [...picked], batchId: batchId || undefined });
-      toast(`${r.added} enrolled${r.skipped ? `, ${r.skipped} already in the course` : ''}`);
+      const ids = [...picked];
+      const r = batchId
+        ? await api.post(`/lms/courses/${course._id}/batches/${batchId}/students`, { studentIds: ids })
+        : await api.post(`/lms/courses/${course._id}/enroll`, { studentIds: ids });
+      toast(batchId ? `${r.added} enrolled${r.updated ? `, ${r.updated} moved into the batch` : ''}` : `${r.added} enrolled${r.skipped ? `, ${r.skipped} already in the course` : ''}`);
       onDone();
     } catch (e) { toast(e.message, 'bad'); setBusy(false); }
   }
 
   return (
     <Modal wide title="Enrol students" onClose={onClose}
-      footer={<><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={go} disabled={busy || (!picked.size && !batchId)}>{busy ? 'Enrolling...' : 'Enrol'}</button></>}>
+      footer={<><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={go} disabled={busy || !picked.size}>{busy ? 'Enrolling...' : 'Enrol'}</button></>}>
       <Loading state={pool}>
         <div className="stack">
-          <Field label="Whole batch" hint="Everyone in the batch is enrolled. You can also tick individual students below.">
+          <Field label="Batch of this course" hint={!courseBatches.length ? 'This course has no batches yet. Create one in the Batches tab, or enrol without a batch.' : batchId ? 'Students go into this batch. A student sits in one batch at a time, so anyone already in another batch is moved.' : 'Students are enrolled in the course without a batch, so no class attendance counts for them.'}>
             <select value={batchId} onChange={(e) => setBatchId(e.target.value)}>
               <option value="">No batch</option>
-              {pool.data?.batches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+              {courseBatches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
             </select>
           </Field>
-          <input type="search" placeholder="Search students" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search students" />
+          <div className="row" style={{ gap: 8 }}>
+            <input className="grow" type="search" placeholder="Search students" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search students" />
+            <button type="button" className="btn sm" onClick={toggleAll} disabled={!list.length}>{allShown ? 'Clear shown' : 'Select shown'}</button>
+          </div>
           <div className="pick-list">
             {list.length === 0 && <div className="muted small" style={{ padding: 12 }}>No students found.</div>}
             {list.map((s) => (
@@ -169,9 +287,22 @@ function EnrollModal({ course, onClose, onDone }) {
   );
 }
 
+// One student's progress, split into attendance, assignments and quizzes.
+function StudentProgress({ course, enrollment, onClose }) {
+  const state = useAsync(() => api.get(`/lms/courses/${course._id}/students/${enrollment.student._id}/progress`), [enrollment.student._id]);
+  return (
+    <Modal wide title={`${enrollment.student.name}: progress`} onClose={onClose} footer={<button className="btn" onClick={onClose}>Close</button>}>
+      <Loading state={state}>{state.data && <ProgressDetail data={state.data} />}</Loading>
+    </Modal>
+  );
+}
+
 function Students({ course }) {
+  const { user } = useAuth();
   const toast = useToast();
   const [adding, setAdding] = useState(false);
+  const [viewing, setViewing] = useState(null);
+  const [bf, setBf] = useState('');
   const state = useAsync(() => api.get(`/lms/courses/${course._id}/students`), [course._id]);
 
   async function remove(e) {
@@ -181,28 +312,50 @@ function Students({ course }) {
   async function issue(e) {
     try { const r = await api.post(`/lms/courses/${course._id}/enroll/${e.student._id}/certificate`); toast(`Certificate ${r.certificate.code} issued`); state.reload(); } catch (err) { toast(err.message, 'bad'); }
   }
+  const all = state.data?.items || [];
+  const batchNames = [...new Set(all.map((e) => e.batch?.name).filter(Boolean))].sort();
+  const items = all.filter((e) => !bf || (bf === '__none' ? !e.batch : e.batch?.name === bf));
 
   return (
     <>
-      <div className="row" style={{ marginBottom: 12 }}>
-        <div className="grow muted">{state.data ? `${state.data.items.length} enrolled` : ''}</div>
+      <div className="row" style={{ marginBottom: 12, gap: 8, flexWrap: 'wrap' }}>
+        <div className="grow muted">{state.data ? `${items.length} of ${all.length} enrolled` : ''}</div>
+        {all.length > 0 && (
+          <select value={bf} onChange={(e) => setBf(e.target.value)} aria-label="Filter by batch" style={{ width: 'auto' }}>
+            <option value="">All batches</option>
+            {batchNames.map((n) => <option key={n} value={n}>{n}</option>)}
+            <option value="__none">No batch</option>
+          </select>
+        )}
         <button className="btn primary" onClick={() => setAdding(true)}>Enrol students</button>
       </div>
       <Loading state={state}>
-        {state.data && (state.data.items.length === 0 ? (
-          <div className="panel"><Empty title="No students yet">Enrol a whole batch or pick students one by one.</Empty></div>
+        {state.data && (all.length === 0 ? (
+          <div className="panel"><Empty title="No students yet">Create a batch for this course, then enrol students into it.</Empty></div>
         ) : (
           <div className="panel table-wrap">
             <table className="table cards">
-              <thead><tr><th>Student</th><th>Progress</th><th>Certificate</th><th className="r"> </th></tr></thead>
+              <thead><tr><th>Student</th><th>Batch</th><th>Progress</th><th>Certificate</th><th className="r"> </th></tr></thead>
               <tbody>
-                {state.data.items.map((e) => (
+                {items.map((e) => (
                   <tr key={e._id}>
                     <td className="full"><div className="title" style={{ fontWeight: 600 }}>{e.student.name}</div><div className="muted small">{e.student.code}</div></td>
-                    <td style={{ minWidth: 150 }}><div className="small num">{e.progress}%</div><ProgressBar value={e.progress} label={`${e.student.name} progress`} /></td>
+                    <td>{e.batch?.name || <span className="muted">-</span>}</td>
+                    <td style={{ minWidth: 220 }}>
+                      <div className="small num">{e.progress}%</div>
+                      <ProgressBar value={e.progress} label={`${e.student.name} progress`} />
+                      <div className="mini-parts" style={{ marginTop: 6 }}>
+                        {['attendance', 'assignments', 'quizzes'].map((k) => (
+                          <span key={k} className={`chip ${e.parts[k] === null ? 'muted' : e.parts[k] < 60 ? 'bad' : 'ok'}`} title={`${PART_LABEL[k]}${e.parts[k] === null ? ': no data yet' : ''}`}>
+                            {PART_SHORT[k]} {e.parts[k] === null ? '-' : `${e.parts[k]}%`}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
                     <td>{e.certificate ? <span className="tag">{e.certificate}</span> : <span className="muted">-</span>}</td>
                     <td className="r">
-                      {!e.certificate && <button className="btn sm" onClick={() => issue(e)}>Issue certificate</button>}{' '}
+                      <button className="btn sm primary" onClick={() => setViewing(e)}>Details</button>{' '}
+                      {!e.certificate && user.role === 'admin' && <button className="btn sm" onClick={() => issue(e)}>Issue certificate</button>}{' '}
                       <button className="btn sm ghost" onClick={() => remove(e)}>Remove</button>
                     </td>
                   </tr>
@@ -213,6 +366,7 @@ function Students({ course }) {
         ))}
       </Loading>
       {adding && <EnrollModal course={course} onClose={() => setAdding(false)} onDone={() => { setAdding(false); state.reload(); }} />}
+      {viewing && <StudentProgress course={course} enrollment={viewing} onClose={() => setViewing(null)} />}
     </>
   );
 }
@@ -529,9 +683,9 @@ function Details({ course, reload, base }) {
         </Field>
         <Field label="Short summary" full><input type="text" value={f.summary} onChange={set('summary')} maxLength={240} /></Field>
         <Field label="About this course" full><textarea rows={5} value={f.description} onChange={set('description')} /></Field>
-        <label className="check full"><input type="checkbox" checked={f.autoCertificate} onChange={(e) => setF((x) => ({ ...x, autoCertificate: e.target.checked }))} /> Issue a certificate automatically when a student finishes every lesson</label>
+        {user.role === 'admin' && <label className="check full"><input type="checkbox" checked={f.autoCertificate} onChange={(e) => setF((x) => ({ ...x, autoCertificate: e.target.checked }))} /> Issue a certificate automatically when a student finishes every lesson</label>}
         {user.role === 'admin' && (
-          <Field label="Instructors" full hint="Staff chosen here can manage this course, mark work and post updates.">
+          <Field label="Teachers" full hint="Teachers chosen here can run this course: lessons, assignments, quizzes, marking and class attendance. Add people on the Teachers page.">
             <div className="pick-list">
               {(staff.data?.items || []).map((s) => (
                 <label key={s._id} className="pick-row">
@@ -539,7 +693,7 @@ function Details({ course, reload, base }) {
                   <span className="grow"><b>{s.name}</b> <span className="muted small">{s.designation || s.role}</span></span>
                 </label>
               ))}
-              {staff.data && staff.data.items.length === 0 && <div className="muted small" style={{ padding: 12 }}>No staff yet.</div>}
+              {staff.data && staff.data.items.length === 0 && <div className="muted small" style={{ padding: 12 }}>No teachers yet. Add one on the <Link to="/admin/learn/teachers">Teachers page</Link>.</div>}
             </div>
           </Field>
         )}
@@ -577,6 +731,7 @@ export default function CourseManage({ teach = false }) {
             </div>
             <Tabs tabs={TABS} value={tab} onChange={setTab} />
             {tab === 'content' && <Curriculum key={JSON.stringify(c.sections.map((s) => s._id))} course={c} reload={state.reload} />}
+            {tab === 'batches' && <Batches course={c} />}
             {tab === 'students' && <Students course={c} />}
             {tab === 'assignments' && <Assignments course={c} />}
             {tab === 'quizzes' && <Quizzes course={c} />}

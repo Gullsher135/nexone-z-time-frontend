@@ -2,9 +2,11 @@ import Shell from './Shell.jsx';
 import { Icon } from '../components.jsx';
 import { api } from '../lib/api.js';
 import { useAsync } from '../lib/useAsync.js';
+import { useAuth } from '../lib/auth.jsx';
 
 // The employee portal. Teaching staff also get a link to their Learn courses.
 export default function CrewLayout() {
+  const { user } = useAuth();
   const teaching = useAsync(() => api.get('/lms/overview').catch(() => ({ courses: 0 })), []);
   const items = [
     { to: '/', label: 'My home', icon: Icon.home, end: true },
@@ -20,6 +22,6 @@ export default function CrewLayout() {
     { to: '/time/leaves', label: 'Leave requests', icon: Icon.leave },
     { to: '/time/history', label: 'Attendance history', icon: Icon.chart },
   ];
-  const links = { time: '/time', crew: '/', flow: '/flow', ...(teaching.data?.courses > 0 ? { learn: '/teach' } : {}) };
+  const links = { time: '/time', crew: '/', flow: '/flow', ...(user.isTeacher || teaching.data?.courses > 0 ? { learn: '/teach' } : {}) };
   return <Shell module="crew" items={items} links={links} accountPath="/account" rootPath="crew" />;
 }

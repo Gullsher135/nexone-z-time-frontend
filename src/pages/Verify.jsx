@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useAsync } from '../lib/useAsync.js';
 import { Loading } from '../components.jsx';
-import { Certificate, internshipProps, longDate } from '../documents.jsx';
+import { Certificate, CompletionCertificate, internshipProps, longDate } from '../documents.jsx';
 
 const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { timeZone: 'Asia/Karachi', day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -49,10 +49,7 @@ function CourseCertificate({ code }) {
           <>
             <div className="verified-bar no-print"><span className="chip ok">Verified</span> This certificate is genuine and was issued by NexoneZ Software House.
               <button className="btn sm primary" style={{ marginLeft: 'auto' }} onClick={() => window.print()}>Print or save as PDF</button></div>
-            <Certificate
-              title="Certificate of Completion" subtitle="NEXONEZ LEARN" lead="This certificate is proudly presented to" name={c.student}
-              body="for successfully completing the course" highlight={c.course} issuedAt={c.issuedAt} code={c.code}
-            />
+            <CompletionCertificate name={c.student} course={c.course} category={c.category} issuedAt={c.issuedAt} code={c.code} />
           </>
         )}
       </Loading>

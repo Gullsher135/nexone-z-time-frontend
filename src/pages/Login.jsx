@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth.jsx';
 import { Field } from '../components.jsx';
 import { ProductOf } from '../brand.jsx';
 
-const home = (u) => (u.role === 'admin' ? '/hub' : u.role === 'student' ? '/learn' : '/');
+const home = (u) => (u.role === 'admin' ? '/hub' : u.role === 'student' ? '/learn' : u.role === 'teacher' ? '/teach' : '/');
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -24,7 +24,7 @@ export default function Login() {
     try {
       const u = await login(email, password);
       const dest = location.state?.from || home(u);
-      navigate(u.mustChangePassword ? (u.role === 'admin' ? '/admin/account' : u.role === 'student' ? '/learn/account' : '/account') : dest, { replace: true });
+      navigate(u.mustChangePassword ? (u.role === 'admin' ? '/admin/account' : u.role === 'student' ? '/learn/account' : u.role === 'teacher' ? '/teach/account' : '/account') : dest, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

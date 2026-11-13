@@ -5,6 +5,7 @@ import { useAsync } from '../../lib/useAsync.js';
 import { useToast } from '../../lib/toast.jsx';
 import { fmtDate, todayKey } from '../../lib/format.js';
 import { Cover, Empty, Field, Loading, Modal, ProgressBar, Tabs, LEVEL_LABEL } from '../../components.jsx';
+import ProgressDetail from './ProgressDetail.jsx';
 
 function embedUrl(url) {
   try {
@@ -181,7 +182,7 @@ function QuizTake({ quizId, onClose, onDone }) {
   );
 }
 
-function Quizzes({ course }) {
+function Quizzes({ course, refresh }) {
   const state = useAsync(() => api.get(`/lms/courses/${course._id}/quizzes`), [course._id]);
   const [taking, setTaking] = useState(null);
   return (
@@ -199,9 +200,15 @@ function Quizzes({ course }) {
           );
         })}</div>
       ))}
-      {taking && <QuizTake quizId={taking} onClose={() => setTaking(null)} onDone={() => { setTaking(null); state.reload(); }} />}
+      {taking && <QuizTake quizId={taking} onClose={() => setTaking(null)} onDone={() => { setTaking(null); state.reload(); refresh?.(); }} />}
     </Loading>
   );
+}
+
+// Attendance + assignment marks + quiz marks, with the weak areas called out.
+function MyProgress({ course }) {
+  const state = useAsync(() => api.get(`/lms/courses/${course._id}/my-progress`), [course._id]);
+  return <Loading state={state}>{state.data && <ProgressDetail data={state.data} />}</Loading>;
 }
 
 function Updates({ course }) {
@@ -241,14 +248,16 @@ export default function CoursePlayer() {
                 <div className="row" style={{ gap: 12, marginTop: 8 }}>
                   <div className="grow" style={{ maxWidth: 360 }}><ProgressBar value={d.enrollment.progress} label="Course progress" /></div>
                   <b className="num">{d.enrollment.progress}%</b>
+                  <button className="btn sm" onClick={() => setTab('progress')}>See breakdown</button>
                   {d.enrollment.certificate && <Link className="btn sm primary" to={`/verify/${d.enrollment.certificate.code}`}>View certificate</Link>}
                 </div>
               </div>
             </div>
-            <Tabs tabs={[{ value: 'lessons', label: 'Lessons' }, { value: 'assignments', label: 'Assignments' }, { value: 'quizzes', label: 'Quizzes' }, { value: 'updates', label: 'Updates' }]} value={tab} onChange={setTab} />
+            <Tabs tabs={[{ value: 'lessons', label: 'Lessons' }, { value: 'assignments', label: 'Assignments' }, { value: 'quizzes', label: 'Quizzes' }, { value: 'progress', label: 'My progress' }, { value: 'updates', label: 'Updates' }]} value={tab} onChange={setTab} />
             {tab === 'lessons' && <Lessons data={d} course={c} reload={state.reload} />}
             {tab === 'assignments' && <Assignments course={c} />}
-            {tab === 'quizzes' && <Quizzes course={c} />}
+            {tab === 'quizzes' && <Quizzes course={c} refresh={state.reload} />}
+            {tab === 'progress' && <MyProgress course={c} />}
             {tab === 'updates' && <Updates course={c} />}
           </>
         )}

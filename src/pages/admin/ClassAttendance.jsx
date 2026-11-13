@@ -43,7 +43,7 @@ function Sheet({ batches }) {
     <div className="stack">
       <div className="tools">
         <select value={batch} onChange={(e) => setBatch(e.target.value)} aria-label="Batch">
-          {batches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+          {batches.map((b) => <option key={b._id} value={b._id}>{b.name}{b.course ? ` · ${b.course}` : ''}</option>)}
         </select>
         <input type="date" value={date} max={todayKey()} onChange={(e) => e.target.value && setDate(e.target.value)} aria-label="Class date" />
         <button className="btn" onClick={() => setAll('present')} disabled={!rows.length}>Mark everyone present</button>
@@ -102,7 +102,7 @@ function Summary({ batches }) {
     <div className="stack">
       <div className="tools">
         <select value={batch} onChange={(e) => setBatch(e.target.value)} aria-label="Batch">
-          {batches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+          {batches.map((b) => <option key={b._id} value={b._id}>{b.name}{b.course ? ` · ${b.course}` : ''}</option>)}
         </select>
         <input type="month" value={month} max={thisMonth()} onChange={(e) => e.target.value && setMonth(e.target.value)} aria-label="Month" />
       </div>
@@ -138,9 +138,10 @@ function Summary({ batches }) {
   );
 }
 
-export default function ClassAttendance() {
+// `teach`: a teacher sees only the batches of the courses they teach.
+export default function ClassAttendance({ teach = false }) {
   const [tab, setTab] = useState('mark');
-  const batches = useAsync(() => api.get('/batches?isActive=true'), []);
+  const batches = useAsync(() => api.get(teach ? '/lms/my/batches?isActive=true' : '/batches?isActive=true'), [teach]);
 
   return (
     <div>
@@ -152,7 +153,7 @@ export default function ClassAttendance() {
       </div>
       <Loading state={batches}>
         {batches.data && (batches.data.items.length === 0 ? (
-          <div className="panel"><Empty title="No running batches">Create a batch first, then add students to it.</Empty></div>
+          <div className="panel"><Empty title="No running batches">{teach ? 'Batches of your courses appear here. Open one of your courses and create a batch in its Batches tab.' : 'Create a batch first, then add students to it.'}</Empty></div>
         ) : (
           <>
             <Tabs tabs={[{ value: 'mark', label: 'Mark attendance' }, { value: 'summary', label: 'Monthly summary' }]} value={tab} onChange={setTab} />

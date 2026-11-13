@@ -51,6 +51,7 @@ import LearnAdminLayout from './layouts/LearnAdminLayout.jsx';
 import StudentLayout from './layouts/StudentLayout.jsx';
 import LearnAdminHome from './pages/learn/LearnAdminHome.jsx';
 import CourseManage from './pages/learn/CourseManage.jsx';
+import Teachers from './pages/learn/Teachers.jsx';
 import StudentHome from './pages/learn/StudentHome.jsx';
 import MyCourses from './pages/learn/MyCourses.jsx';
 import CoursePlayer from './pages/learn/CoursePlayer.jsx';
@@ -67,6 +68,10 @@ function Protected({ role }) {
   const isStudent = user.role === 'student';
   if (role === 'student') return isStudent ? <Outlet /> : <Navigate to={isAdmin ? '/hub' : '/'} replace />;
   if (isStudent) return <Navigate to="/learn" replace />;
+  // The teacher portal is open to teacher-only logins and to employees/interns with teacher access.
+  if (role === 'teach') return isAdmin ? <Navigate to="/hub" replace /> : <Outlet />;
+  // A teacher-only login never sees the employee or admin pages.
+  if (user.role === 'teacher') return <Navigate to="/teach" replace />;
   if (role === 'admin' && !isAdmin) return <Navigate to="/" replace />;
   if (role === 'staff' && isAdmin) return <Navigate to="/hub" replace />;
   return <Outlet />;
@@ -98,9 +103,11 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<Protected role="staff" />}>
+      <Route element={<Protected role="teach" />}>
         <Route path="/teach" element={<LearnAdminLayout teach />}>
           <Route index element={<LearnAdminHome teach />} />
+          <Route path="attendance" element={<ClassAttendance teach />} />
+          <Route path="account" element={<Account />} />
           <Route path=":id" element={<CourseManage teach />} />
         </Route>
       </Route>
@@ -152,6 +159,7 @@ export default function App() {
         </Route>
         <Route path="/admin/learn" element={<LearnAdminLayout />}>
           <Route index element={<LearnAdminHome />} />
+          <Route path="teachers" element={<Teachers />} />
           <Route path=":id" element={<CourseManage />} />
         </Route>
         <Route path="/admin" element={<AdminLayout />}>

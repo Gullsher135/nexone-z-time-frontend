@@ -69,7 +69,7 @@ export const STATUS = {
   na: { label: '-', tone: 'muted' },
 };
 
-export const ROLE_LABEL = { admin: 'Admin', employee: 'Employee', intern: 'Intern', student: 'Student' };
+export const ROLE_LABEL = { admin: 'Admin', employee: 'Employee', intern: 'Intern', student: 'Student', teacher: 'Teacher' };
 
 const hhmmFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false });
 export const hhmmFromIso = (iso) => (iso ? hhmmFmt.format(new Date(iso)).replace('24:', '00:') : null);

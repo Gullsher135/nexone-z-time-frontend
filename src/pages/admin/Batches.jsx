@@ -8,12 +8,13 @@ import { fmtDate } from '../../lib/format.js';
 function BatchForm({ batch, onClose, onSaved }) {
   const toast = useToast();
   const [form, setForm] = useState({
-    name: batch?.name || '', course: batch?.course || '', instructor: batch?.instructor || '',
+    name: batch?.name || '', courseId: batch?.courseId || '', instructor: batch?.instructor || '',
     schedule: batch?.schedule || '', startDate: batch?.startDate || '', endDate: batch?.endDate || '',
     isActive: batch?.isActive ?? true,
   });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const courses = useAsync(() => api.get('/lms/courses'), []);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function save(e) {
@@ -21,8 +22,10 @@ function BatchForm({ batch, onClose, onSaved }) {
     setBusy(true);
     setError('');
     try {
-      if (batch) await api.patch(`/batches/${batch._id}`, form);
-      else await api.post('/batches', form);
+      // a batch that is not linked to a course keeps its old course text
+      const body = { ...form, course: form.courseId ? undefined : (batch?.course || '') };
+      if (batch) await api.patch(`/batches/${batch._id}`, body);
+      else await api.post('/batches', body);
       toast(batch ? 'Batch updated' : 'Batch created');
       onSaved();
     } catch (err) {
@@ -39,7 +42,12 @@ function BatchForm({ batch, onClose, onSaved }) {
         {error && <div className="alert bad" role="alert">{error}</div>}
         <div className="form-grid">
           <Field label="Batch name"><input type="text" value={form.name} onChange={set('name')} required placeholder="AI Batch 2" /></Field>
-          <Field label="Course"><input type="text" value={form.course} onChange={set('course')} placeholder="AI and Programming" /></Field>
+          <Field label="Course" hint={!form.courseId && batch?.course ? `Not linked to a course yet (was: ${batch.course}).` : 'Batches belong to a course. You can also create them inside the course in NexoneZ Learn.'}>
+            <select value={form.courseId} onChange={set('courseId')}>
+              <option value="">No course</option>
+              {(courses.data?.items || []).map((c) => <option key={c._id} value={c._id}>{c.title}</option>)}
+            </select>
+          </Field>
           <Field label="Instructor"><input type="text" value={form.instructor} onChange={set('instructor')} /></Field>
           <Field label="Class timing"><input type="text" value={form.schedule} onChange={set('schedule')} placeholder="Mon to Fri, 4 to 6 pm" /></Field>
           <Field label="Start date"><input type="date" value={form.startDate} onChange={set('startDate')} /></Field>

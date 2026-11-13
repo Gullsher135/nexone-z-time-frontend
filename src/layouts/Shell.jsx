@@ -6,7 +6,7 @@ import { ModuleSwitch, ProductOf, moduleOf } from '../brand.jsx';
 
 // One responsive shell for every module: sidebar on desktop, drawer on phones.
 // `links` are the live modules this person can open; `items` is the module's own menu.
-export default function Shell({ module, items, links, accountPath, rootPath }) {
+export default function Shell({ module, items, links, accountPath, rootPath, hideUnlinked = false }) {
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
@@ -36,7 +36,7 @@ export default function Shell({ module, items, links, accountPath, rootPath }) {
       <div className={`scrim ${open ? 'on' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
       <aside className={`side ${open ? 'open' : ''}`} aria-label="Menu">
         <div className="side-top">
-          <ModuleSwitch current={module} links={links} />
+          <ModuleSwitch current={module} links={links} hideUnlinked={hideUnlinked} />
           <button className="icon-btn side-close" aria-label="Close menu" onClick={() => setOpen(false)}>{Icon.close}</button>
         </div>
         <nav className="nav" aria-label="Main">

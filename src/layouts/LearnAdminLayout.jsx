@@ -6,11 +6,18 @@ import { useAuth } from '../lib/auth.jsx';
 export default function LearnAdminLayout({ teach = false }) {
   const { user } = useAuth();
   const base = teach ? '/teach' : '/admin/learn';
+  const isAdmin = user.role === 'admin';
+  const teacherOnly = user.role === 'teacher'; // a teacher login has nothing but this portal
   const items = [
-    ...(user.role === 'admin' ? [{ to: '/hub', label: 'Hub home', icon: Icon.home, end: true }, { sep: true }] : []),
+    ...(isAdmin ? [{ to: '/hub', label: 'Hub home', icon: Icon.home, end: true }, { sep: true }] : []),
     { to: base, label: teach ? 'My courses' : 'Courses', icon: Icon.book, end: true },
-    ...(user.role === 'admin' ? [{ to: '/admin/people', label: 'Students and staff', icon: Icon.people }] : []),
+    ...(teach ? [{ to: '/teach/attendance', label: 'Class attendance', icon: Icon.check }] : []),
+    ...(isAdmin ? [{ to: '/admin/learn/teachers', label: 'Teachers', icon: Icon.user }, { to: '/admin/people', label: 'Students and staff', icon: Icon.people }] : []),
   ];
-  const links = user.role === 'admin' ? { time: '/admin', learn: '/admin/learn', crew: '/admin/crew', pay: '/admin/pay', flow: '/admin/flow' } : { time: '/time', learn: '/teach', crew: '/', flow: '/flow' };
-  return <Shell module="learn" items={items} links={links} accountPath={user.role === 'admin' ? '/admin/account' : '/account'} rootPath={base} />;
+  let links;
+  if (isAdmin) links = { time: '/admin', learn: '/admin/learn', crew: '/admin/crew', pay: '/admin/pay', flow: '/admin/flow' };
+  else if (teacherOnly) links = { learn: '/teach' };
+  else links = { time: '/time', learn: '/teach', crew: '/', flow: '/flow' };
+  const accountPath = isAdmin ? '/admin/account' : teacherOnly ? '/teach/account' : '/account';
+  return <Shell module="learn" items={items} links={links} accountPath={accountPath} rootPath={base} hideUnlinked={teacherOnly} />;
 }

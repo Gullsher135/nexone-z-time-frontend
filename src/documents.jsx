@@ -165,3 +165,126 @@ export function LetterSheet({ letter: l }) {
     </div>
   );
 }
+
+
+// ---------------------------------------------------------------------------
+// Course completion certificate (NexoneZ Learn). Everything is sized in cqw so it scales with its box.
+// ---------------------------------------------------------------------------
+const lines = (n, f) => Array.from({ length: n }, (_, i) => f(i));
+
+function CertArt() {
+  return (
+    <svg className="nzc-art" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="nzc-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor="#ece6ff" /></linearGradient>
+        <linearGradient id="nzc-pu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#3a1bb8" /><stop offset="1" stopColor="#7b4dff" /></linearGradient>
+        <linearGradient id="nzc-go" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#c9962b" /><stop offset=".5" stopColor="#f6dc86" /><stop offset="1" stopColor="#c9962b" /></linearGradient>
+      </defs>
+      <rect width="1536" height="1024" fill="url(#nzc-bg)" />
+      {/* soft wave lines */}
+      <g fill="none" stroke="#7c5cf0" strokeWidth="1.2" opacity=".16">
+        {lines(16, (i) => <path key={`l${i}`} d={`M0 ${640 + i * 11} C 280 ${560 + i * 14}, 520 ${900 + i * 6}, 900 ${760 + i * 16}`} />)}
+        {lines(16, (i) => <path key={`r${i}`} d={`M1536 ${380 + i * 11} C 1330 ${330 + i * 12}, 1180 ${560 + i * 8}, 1010 ${700 + i * 13}`} />)}
+      </g>
+      {/* top left corner */}
+      <polygon points="0,0 300,0 0,225" fill="#160a5c" />
+      <polygon points="300,0 392,0 0,292 0,225" fill="#4a24d6" />
+      <polygon points="392,0 440,0 0,330 0,292" fill="#a58bff" />
+      <line x1="0" y1="338" x2="454" y2="0" stroke="url(#nzc-go)" strokeWidth="3.5" />
+      {/* top right tag */}
+      <polygon points="1090,0 1536,0 1536,330" fill="url(#nzc-pu)" opacity=".92" />
+      <polygon points="1205,0 1536,0 1536,98 1262,98" fill="#160a5c" />
+      {/* bottom right corner */}
+      <polygon points="1536,1024 1236,1024 1536,799" fill="#160a5c" />
+      <polygon points="1236,1024 1144,1024 1536,732 1536,799" fill="#4a24d6" />
+      <polygon points="1144,1024 1096,1024 1536,694 1536,732" fill="#a58bff" />
+      <line x1="1536" y1="686" x2="1082" y2="1024" stroke="url(#nzc-go)" strokeWidth="3.5" />
+      {/* inner frame */}
+      <path d="M46 22 H1490 L1514 46 V978 L1490 1002 H46 L22 978 V46 Z" fill="none" stroke="#4a24d6" strokeWidth="2.2" />
+    </svg>
+  );
+}
+
+function CertSeal() {
+  const rim = lines(240, (i) => {
+    const a = (i / 240) * Math.PI * 2;
+    const r = 84 + 4.5 * Math.cos(a * 28);
+    return `${(100 + r * Math.cos(a)).toFixed(1)},${(100 + r * Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+  const leaf = (side) => lines(9, (i) => {
+    const a = (side * (28 + i * 15) + 90) * (Math.PI / 180); // sweep up each side of the badge
+    const x = 100 + 56 * Math.cos(a);
+    const y = 100 + 56 * Math.sin(a);
+    return <ellipse key={`${side}${i}`} cx={x} cy={y} rx="3.2" ry="8" fill="#b57e12" opacity=".85" transform={`rotate(${(a * 180) / Math.PI + 90} ${x} ${y})`} />;
+  });
+  return (
+    <svg className="nzc-seal" viewBox="0 0 200 250" aria-hidden="true">
+      <defs>
+        <radialGradient id="nzc-gold" cx=".35" cy=".3" r=".9"><stop offset="0" stopColor="#fff3b8" /><stop offset=".55" stopColor="#f0bf45" /><stop offset="1" stopColor="#b8821a" /></radialGradient>
+      </defs>
+      <polygon points="64,150 112,170 90,244 74,226 52,238" fill="#4a24d6" stroke="#e2b550" strokeWidth="3" strokeLinejoin="round" />
+      <polygon points="136,150 88,170 110,244 126,226 148,238" fill="#3a1bb8" stroke="#e2b550" strokeWidth="3" strokeLinejoin="round" />
+      <polygon points={rim} fill="url(#nzc-gold)" stroke="#a9761a" strokeWidth="1.5" />
+      <circle cx="100" cy="100" r="70" fill="none" stroke="#a9761a" strokeWidth="2.4" />
+      <circle cx="100" cy="100" r="66" fill="#f8dc80" opacity=".55" />
+      {leaf(1)}{leaf(-1)}
+      <polygon points="100,62 133,81 133,119 100,138 67,119 67,81" fill="#fbf9ff" stroke="#1b1464" strokeWidth="5" strokeLinejoin="round" />
+      <image href="/nexonez-icon.png" x="74" y="72" width="52" height="56" preserveAspectRatio="xMidYMid meet" />
+    </svg>
+  );
+}
+
+const CalendarIcon = () => (
+  <svg viewBox="0 0 32 32" className="nzc-cal" aria-hidden="true" fill="none" stroke="#4a24d6" strokeWidth="2.2" strokeLinecap="round">
+    <rect x="4" y="6" width="24" height="22" rx="4" />
+    <path d="M4 13h24M10 3v6M22 3v6" />
+    {[10, 16, 22].flatMap((x) => [18, 23].map((y) => <circle key={`${x}${y}`} cx={x} cy={y} r="1.1" fill="#4a24d6" stroke="none" />))}
+  </svg>
+);
+
+export function CompletionCertificate({ name, course, category, issuedAt, code }) {
+  const long = course.length > 52 ? '1.6cqw' : course.length > 34 ? '1.95cqw' : '2.3cqw';
+  return (
+    <div className="nzc" role="img" aria-label={`Certificate of completion for ${name}, ${course}`}>
+      <CertArt />
+      <div className="nzc-tagline">Learn <i>•</i> Build <i>•</i> Grow</div>
+      <div className="nzc-content">
+        <div className="nzc-brand">
+          <img src="/nexonez-icon.png" alt="" />
+          <div className="nzc-brand-text"><b>Nexone<span>Z</span></b><span>Software House &amp; Training Institute</span></div>
+        </div>
+        <h1>Certificate</h1>
+        <div className="nzc-of"><i />OF COMPLETION<i /></div>
+        <p className="nzc-lead">This is to certify that</p>
+        <div className="nzc-name" style={{ fontSize: name.length > 26 ? '5.2cqw' : '7cqw' }}>{name}</div>
+        <p className="nzc-txt">has successfully completed the requirements of</p>
+        <div className="nzc-course" style={{ fontSize: long }}>{course}</div>
+        {category && (
+          <>
+            <p className="nzc-txt">and demonstrated exceptional skills and dedication in the field of</p>
+            <div className="nzc-field">{category}</div>
+          </>
+        )}
+        <p className="nzc-note">We appreciate your hard work and commitment towards learning and innovation.<br />Keep up the great work!</p>
+      </div>
+      <div className="nzc-foot">
+        <div className="nzc-left">
+          <div className="nzc-qr">
+            {code && <QRCodeSVG value={verifyUrl(code)} size={256} level="M" bgColor="#ffffff" fgColor="#1b1464" style={{ width: '100%', height: '100%' }} />}
+            <span>Scan to verify</span>
+          </div>
+          <div className="nzc-date">
+            <div className="nzc-date-row"><CalendarIcon /><div><small>Date of Issue:</small><b>{longDate(issuedAt)}</b></div></div>
+            <div className="nzc-id">Certificate ID: {code}</div>
+          </div>
+        </div>
+        <CertSeal />
+        <div className="nzc-sign">
+          <img src="/signature.png" alt={`Signature of ${SIGNATORY.name}`} />
+          <div className="nzc-sign-line" />
+          <b>CEO, NexoneZ</b>
+        </div>
+      </div>
+    </div>
+  );
+}
